@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Math Review</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Andrew Waxman" />
+    <link href="00-lecture-mathreview-FA20_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="00-lecture-mathreview-FA20_files/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="00-lecture-mathreview-FA20_files/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="mtheme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Math Review
+## PA 393K/393L
+### Andrew Waxman
+### Fall 2020
+
+---
+
+class: inverse, middle
+
+
+
+
+
+layout: false
+.smallest[
+.pull-left[
+# This Week's Class
+1. [Graphing](#graph)
+2. [Equations](#eq)
+3. [Practice Problems](#qs)
+]
+.pull-right[
+# Some useful stuff we'll learn about today
+1. [Slope](#slope)
+2. [Equations for Lines](#eql)
+3. [Tangency](#tang)
+4. [Solving SOEs](#subs)
+]
+]
+---
+class: inverse, middle
+layout: false
+name:math
+# Math Review
+---
+layout:true
+name: graph
+---
+# Graphing - Basic Definitions
+- .hi[Variable:] quantity that can take on more than one value (hence "variable")
+  - Example: __income__ for one person may be $100K, another $25K
+
+--
+  
+- .hi[Units:] what is being measured. **Very important** to help identify what we are seeing. 
+  - Example: __annual income per capita in $1,000's__ 
+  (_Source:_ [FRED](https://fred.stlouisfed.org/series/A792RC0Q052SBEA))
+  
+
+--
+
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-2-1.svg" style="display: block; margin: auto;" /&gt;
+
+
+&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt; 
+
+---
+
+# Things that matter
+- Labels: tell us what is what
+- Units: tell us how things are measured
+- Scale: Affects what we see and therefore what we infer from th epicture
+
+---
+
+# Scale
+.center2[
+  .pull-left[
+    &lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-3-1.svg" style="display: block; margin: auto;" /&gt;
+
+  ]
+  .pull-right[
+    &lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-4-1.svg" style="display: block; margin: auto;" /&gt;
+  ]
+]
+
+---
+# Graphing - Basic Definitions
+
+## Variables: 
+- We just showed you income. What if we are interested in the relationship between .pink[income] and .pink[years of schooling]?
+
+.hi[Two Variables]
+
+Common convention (i.e., no specific meaning to it) in math:
+- Call one variable the .ul[x-variable]
+  - Put this one on the horizontal axis
+- Call the other the .ul[y-variable]
+  -This one on the vertical axis
+---
+# Example: Two Y-variables, One X-variable
+
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-5-1.svg" style="display: block; margin: auto;" /&gt;
+--
+.hi[.ul[Note:] the lines here represent the connection of points (e.g. 90% and $1,490 for Egypt)]
+---
+# .hi[An aside...]
+
+.pull-left[
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-6-1.svg" style="display: block; margin: auto;" /&gt;
+- .ul[inflation] - rate of growth of prices in economy
+  - higher inflation rate -&gt; faster cost of living rises
+]
+
+.pull-right[
+
+- We may be interested in adjusting variables based on this relative cost of living: called defating the variable
+
+- .ul[real] $'s (income, prices, etc.) - deflated to account for inflation
+
+- .ul[nominal] $'s (income, prices, etc.) - undeflated -&gt; like the actual value at the time
+]
+
+---
+# Inflation vs. PPP: .hi[Big Mac Index 🍔 💵]
+&lt;iframe src="https://public.tableau.com/views/TheBigMacIndex/TheBigMacIndex?:embed=y&amp;amp;:loadOrderID=0&amp;amp;:display_count=no&amp;amp;:showTabs=y&amp;amp;:showVizHome=no" width="845" height="555"&gt;&lt;/iframe&gt;
+
+---
+# Two Axis Graph
+
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-7-1.svg" style="display: block; margin: auto;" /&gt;
+---
+# Types of Curves
+
+.ul[curve] - any line connecting points on a graph
+
+ - (doesn't have to be straight, but maybe)
+
+--
+
+- straight: .ul[linear relationship]
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-8-1.svg" style="display: block; margin: auto;" /&gt;
+
+
+---
+# Types of Curves
+.ul[curve] - any line connecting points on a graph
+ - (doesn't have to be straight, but maybe)
+ - straight: .ul[linear relationship]
+ - curved: .ul[non-linear relationsip]
+
+
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-9-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+# Types of Curves
+.ul[curve] - any line connecting points on a graph
+ - (doesn't have to be straight, but maybe)
+ - straight: .ul[linear relationship]
+ - curved: .ul[non-linear relationsip]
+ - something else (here .hl[piece-wise linear])
+
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-10-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+# Relationships between Variables
+
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-11-1.svg" style="display: block; margin: auto;" /&gt;
+
+ - These are .hi[all] .ul[positive relationships]: as the temps increase, so too does A/C use
+
+---
+
+# Negative Relationships
+
+ - as the temps increase, indoor heating use .hi[goes down]
+ 
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-12-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Important Characteristics
+
+ - Sometimes useful to know where graph intersects axes (things with the numbers on them)
+ 
+--
+
+ - .hi[Common] to call the horizontal axis .ul["x-axis"] &amp; vertical axis .ul["y-axis"]
+
+
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-13-1.svg" style="display: block; margin: auto;" /&gt;
+---
+name:eql
+# Y-intercept
+
+ - vertical intercept (aka y-intercept) at $5 per gallon 
+
+ 
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-14-1.svg" style="display: block; margin: auto;" /&gt;
+
+--
+ - This tells us the price of the .hi[.ul[first]] gallon of water
+---
+# X-intercept
+
+
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-15-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+# X-intercept
+
+ - horizontal intercept (aka y-intercept) at 4 popsicles
+
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-16-1.svg" style="display: block; margin: auto;" /&gt;
+
+--
+
+ - I won't be adding "x" and "y" to the axes from here on, just remember which is whiche
+
+---
+# Slope
+name: slope
+
+ - How does the y-variable change as I change the x variable?
+ 
+--
+ 
+ - Sounds boring, but one of the most used characteristics in this class
+  - The slope often represents some policy relevant change
+  - How will cigarette consumption change if we tax them by $4 per pack?
+--
+
+  - Let's look at data of how cigarette consumption changes with price...
+
+---
+# Useful thing to consider...
+
+.orange[Causal Relationship]
+
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-17-1.svg" style="display: block; margin: auto;" /&gt;
+--
+.orange[Non-Causal Relationship]
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-18-1.svg" style="display: block; margin: auto;" /&gt;
+---
+# Cigarette consumption vs. Price
+
+ - Say price is now $6 and 12 packs are consumed
+ - If we tax cigarettes by $4 per pack, then the price per pack raises to $10
+ - The line shows only 4 packs are consumed under this higher price
+
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-19-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+
+layout: false
+class: top,clear
+ 
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-20-1.svg" style="display: block; margin: auto;" /&gt;
+
+ - Slope - change in y variable divided by change in x variable
+ .pull-left[
+ in Math: `$$m=\frac{\Delta Y}{\Delta X} = \frac{Y_2-Y_1}{X_2-X_1},$$`
+ ]
+ 
+---
+layout: false
+class: top,clear
+ 
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-21-1.svg" style="display: block; margin: auto;" /&gt;
+
+ .hi[Slope] - change in y variable divided by change in x variable
+ .pull-left[
+in Math: `$$m=\frac{\Delta Y}{\Delta X} = \frac{Y_2-Y_1}{X_2-X_1},$$`
+ ]
+
+ 
+ .pull-right[
+for this graph:  `$$Slope = \frac{6-10}{12-4}=\frac{-4}{8}=-.5$$`
+  ]
+
+--
+
+.hi[Careful:] Need to be consistent about order of x's and y's
+ 
+---
+layout: false
+class: top,clear
+ 
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-22-1.svg" style="display: block; margin: auto;" /&gt;
+
+ .hi[Slope] - change in y variable divided by change in x variable
+ .pull-left[
+in Math: `$$m=\frac{\Delta Y}{\Delta X} = \frac{Y_2-Y_1}{X_2-X_1},$$`
+ ]
+
+ 
+ .pull-right[
+for this graph:  `$$Slope = \frac{6-10}{12-4}=\frac{-4}{8}=-.5$$`
+  ]
+
+.hi[Note:] often we denote slope by the letter .hi[m]
+
+---
+layout: true
+
+# Non-linear Curves
+
+beziers &lt;- data.frame(
+  x = c(1, 2, 3, 4, 4, 6, 6),
+  y = c(0, 2, 0, 0, 2, 2, 0),
+  type = rep(c('cubic', 'quadratic'), c(3, 4)),
+  point = c('end', 'control', 'end', 'end', 'control', 'control', 'end'),
+  colour = letters[1:7]
+)
+
+
+---
+layout: false
+class: top,clear
+
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-23-1.svg" style="display: block; margin: auto;" /&gt;
+
+`$$Slope = \frac{6-10}{12-4}=\frac{-4}{8}=-.5$$`
+.hi[Interpretation:] Every $1 increase in price, demand for cigs falls by `\(\frac{1}{2}\)`
+
+--
+
+.hi[Note:] Along a straight line, the slope is the same at every point!
+---
+layout: true
+
+
+
+---
+layout: false
+class: top,clear
+
+Along a non-straight curve, the slope may vary from point to point
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-25-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+layout: false
+class: top,clear
+
+.hi[The slope...]
+ 1. Not the same at every point
+ 2. Gets larger _(in this case)_
+ 3. Always positive _(in this case)_
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-26-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+layout: false
+class: top,clear
+
+Can draw graphs with positive slope where slope gets smaller
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-27-1.svg" style="display: block; margin: auto;" /&gt;
+--
+Can draw graphs with negative slope where slope gets bigger/smaller
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-28-1.svg" style="display: block; margin: auto;" /&gt;
+---
+layout: false
+class: top,clear
+
+Can draw graphs where slope is both increasing and decreasing
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-29-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+layout: false
+class: top,clear
+
+Can draw graphs where slope is both positive and negative
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-30-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+layout: false
+class: top,clear
+name:tang
+Calculating Slope of a Curve at a Point
+
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-31-1.svg" style="display: block; margin: auto;" /&gt;
+Slope is `\(\frac{2}{4}=\frac{1}{2}\)`
+---
+layout: false
+class: top,clear
+
+Arc Method of Slope Calculation - calculate the slope of line connecting two points on curve
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-32-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+layout: false
+class: top,clear
+Area Under a Line
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-33-1.svg" style="display: block; margin: auto;" /&gt;
+
+Area of the curve is 🔺 + ⬜
+
+---
+layout: false
+class: top,clear
+Area Under a Line
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-34-1.svg" style="display: block; margin: auto;" /&gt;
+
+Area of 🔺 = `\(\frac{1}{2} \times base \times height = .5 \times 10 \times (4-2) =10\)`
+---
+layout: false
+class: top,clear
+Area Under a Line
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-35-1.svg" style="display: block; margin: auto;" /&gt;
+
+Area of ⬜ : `\(base \times height = 10 \times 2 =20\)`
+
+🔺 + ⬜= 20 + 10 = 30
+---
+# Cartesian Coordinate System
+Express location of points on a graph in parentheses: (x-value, y-value)
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-36-1.svg" style="display: block; margin: auto;" /&gt;
+If we have two points, we may want to determine the line that connects them
+
+.center[.hi[HOW?]]
+---
+name: eqs
+# Equations, Expressions &amp; Operators
+ - .ul[.hi[Variable:]] something that can take more than one value: `\(x=1,3,5,6\)`
+ - .ul[.hi[Operator:]] performs a mathematical operation
+  - Recall order of operations: .hi[P-E-M-D-A-S]
+   - (), `\(x^2\)`, `\(x\times y\)`, `\(\frac{\pi}{2}\)`, `\(🥕+🎂\)`, `\(x-3\)`
+ - .ul[.hi[Expression:]] any combination of mathematical symbols, variables, operators
+  - Ex.: `\(3+4\)`, `\(x^3\)`, `\(16\)`, `\(y+2\)`
+ - .ul[.hi[Equation:]] Relates a pair of expression using an equals sign ($=$) to state equality
+  - `\(2+2=4\)`, `\(x-3=y\)`
+  - Can express non-equality: `\(2+3\neq 4\)`
+  - Can express inequality: `\(2+3&gt;4\)`, `\(1+6 \geq x\)`
+---
+# Representing lines
+## Slope-Intercept Form
+
+`$$y= 3x+2$$`
+.center[y-var. = slope * x + y-intercept (AKA `\(y=mx+b\)`)]
+ - m = 3 is the slope
+ - b = 2 is the y-intercept
+
+## Point-Slope Form
+`$$y-y_1 = m \times \left(x-x_1\right)$$`
+`$$\Rightarrow y=m(x-x_1)+y_1$$`
+
+$$ = mx-mx_1+y_1$$
+`$$\Rightarrow \text{y-intercept}=y_1-m\times x_1$$`
+---
+# A very common problem...
+Two equations:
+`$$y=a-bx$$`
+`$$y=c+dx$$`
+where a,b,c,d are parameters (any constant number)
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-37-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+layout: false
+class: top,clear
+name: subs
+Two easy ways to solve for `\(\left(x^*,y^*\right)\)`
+ 1. Subtract equations 
+ $$ \quad y = a - bx $$
+ $$ -\quad y=c+dx$$
+ &lt;hr&gt;
+ `$$\Rightarrow 0 = a-c-bx-dx$$`
+ `$$\Rightarrow a-bx = c+dx$$`
+ `$$\Rightarrow (b+x)x = a-c$$`
+ `$$x^*=\frac{a-c}{b+d}$$`
+ If we plug back into one of the original equations to find `\(y^*\)`:
+ `$$y* = a-b\left(\frac{a-c}{b+d}\right)$$`
+---
+layout: false
+class: top,clear
+Two easy ways to solve for `\(\left(x^*,y^*\right)\)`
+ 2. Substitute one equation into the other
+ $$ y = y $$
+ $$ a-bx = c +dx$$
+ `$$x^*=\frac{a-c}{b+d}$$`
+ `$$y* = a-b\left(\frac{a-c}{b+d}\right)$$`
+---
+layout: false
+class: top,clear
+ Example problem:
+ $$ y = 27-3x$$
+ $$ y = 9x - 9$$
+ `$$\Rightarrow 27-3x = 9x-9$$`
+ `$$\Rightarrow 36 = 12x$$`
+ `$$x^*=3$$`
+ `$$y^*=9x^*-9=9*3-9=27-9=18$$`
+ 
+---
+
+layout: false
+class: top,clear
+
+$$ y = 27-3x$$
+$$ y = 9x - 9$$
+.hi[solution:] `\(\left(x^*,y^*\right)=\left(3,18\right)\)`
+ 
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-38-1.svg" style="display: block; margin: auto;" /&gt;
+---
+# Charts from Data
+Example: City of Buda - High School Exit Test Scores vs. Student to Teach ratio
+
+|Year  | Stu/Teach | Exit Test Score|
+|-----|----|---|
+|2000 | 20 | 80|
+|2002 | 26 | 65|
+|2004 | 28 | 60|
+|2006 | 32 | 50|
+|2008 | 30 | 55|
+|2010 | 22 | 75|
+|2012 | 24 | 79|
+---
+
+layout: false
+class: top,clear
+Sort it by independent variable: student-teacher ratio
+.pull-left[
+|Year  | Stu/Teach | Exit Test Score|
+|-----|----|---|
+|2000 | 20 | 80|
+|2002 | 26 | 65|
+|2004 | 28 | 60|
+|2006 | 32 | 50|
+|2008 | 30 | 55|
+|2010 | 22 | 75|
+|2012 | 24 | 79|
+]
+.pull-right[
+|Stu/Teach | Exit Test Score|
+|----------|-----------------|
+| 20 | 80 |
+| 22 | 75 |
+| 24 | 70 |
+| 26 | 65 |
+| 28 | 60 |
+| 30 | 55 |
+| 32 | 50 |
+]
+---
+
+layout: false
+class: top,clear
+
+.pull-left[
+|Stu/Teach | Exit Test Score|
+|----------|-----------------|
+| 20 | 80 |
+| 22 | 75 |
+| 24 | 70 |
+| 26 | 65 |
+| 28 | 60 |
+| 30 | 55 |
+| 32 | 50 |
+]
+.pull-right[
+ - What is slope?
+ - Note that for every increase of 2 students to 1 teacher, test scores go down by 5
+ - Slope = -5/2 = -2.5
+]
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-39-1.svg" style="display: block; margin: auto;" /&gt;
+---
+layout: false
+class: top,clear
+.pull-left[.smallest[
+|Stu/Teach | Exit Test Score|
+|----------|-----------------|
+| 20 | 80 |
+| 22 | 75 |
+| 24 | 70 |
+| 26 | 65 |
+| 28 | 60 |
+| 30 | 55 |
+| 32 | 50 |
+]
+]
+.pull-right[
+ - What is y-intercept?: each step in Stu/Teach ratio is 2: 10 steps -&gt; scores increase by 5 for each step: -&gt; 50 points
+  - 10*5 + 80 = 130
+- equation for line: TestScore = 130 - 2.5 * StudentTeacherRatio
+]
+&lt;img src="00-lecture-mathreview-FA20_files/figure-html/unnamed-chunk-40-1.svg" style="display: block; margin: auto;" /&gt;
+---
+name: qs
+
+#Practice Problem
+Austin Integrated School District
+Enrollment in 2018: 82,520
+Enrollment in 2019: 80,495
+Expenditures in 2018: $1.6 billion
+Expenditures in 2019: $2.082 billion
+
+ 1. What is spending per student?
+ 2. Calculate percentage change in each variable 2018-9
+ 3. What is the slope of the line that connects 2018, where enrollment is x and expenditures is y?
+
+---
+exclude: true
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
