@@ -1,0 +1,1517 @@
+---
+title: "Math Review"
+subtitle: "PA 393K/393G"
+author: "Andrew Waxman"
+date: "Fall 2020"
+output:
+  xaringan::moon_reader:
+    css: ['default', 'metropolis', 'metropolis-fonts', 'mtheme.css']
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+header-includes: 
+  - \usepackage{tikz}
+  - \usepackage{pgfplots}
+---
+class: inverse, middle
+
+```{R, setup, include = F}
+# devtools::install_github("dill/emoGG")
+library(pacman)
+p_load(
+  broom, tidyverse,
+  latex2exp, ggplot2, ggthemes, ggforce, viridis, extrafont, gridExtra,
+  kableExtra, snakecase, janitor, tidyverse, extrafont,
+  data.table, dplyr, estimatr, quantmod, wbstats, viridis, ggthemes,
+  lubridate, knitr, parallel, xml2,grid,
+  lfe, quantmod,here, magrittr
+)
+# Define pink color
+red_pink <- "#e64173"
+turquoise <- "#20B2AA"
+orange <- "#FFA500"
+red <- "#fb6107"
+blue <- "#2b59c3"
+green <- "#8bb174"
+grey_light <- "grey70"
+grey_mid <- "grey50"
+grey_dark <- "grey20"
+purple <- "#6A5ACD"
+slate <- "#314f4f"
+# Dark slate grey: #314f4f
+# Knitr options
+opts_chunk$set(
+  comment = "#>",
+  fig.align = "center",
+  fig.height = 7,
+  fig.width = 10.5,
+  warning = F,
+  message = F
+)
+opts_chunk$set(dev = "svg")
+options(device = function(file, width, height) {
+  svg(tempfile(), width = width, height = height)
+})
+options(crayon.enabled = F)
+options(knitr.table.format = "html")
+# A blank theme for ggplot
+theme_empty <- theme_bw() + theme(
+  line = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  plot.margin = structure(c(0, 0, -0.5, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_simple <- theme_bw() + theme(
+  line = element_blank(),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text.x = element_text(size = 18, family = "STIXGeneral"),
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  # plot.margin = structure(c(0, 0, -1, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes_math <- theme_void() + theme(
+  text = element_text(family = "MathJax_Math"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes_serif <- theme_void() + theme(
+  text = element_text(family = "MathJax_Main"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes <- theme_void() + theme(
+  text = element_text(family = "Fira Sans Book"),
+  axis.title = element_text(size = 18),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = grey_light,
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_set(theme_gray(base_size = 20))
+# Column names for regression results
+reg_columns <- c("Term", "Est.", "S.E.", "t stat.", "p-Value")
+# Function for formatting p values
+format_pvi <- function(pv) {
+  return(ifelse(
+    pv < 0.0001,
+    "<0.0001",
+    round(pv, 4) %>% format(scientific = F)
+  ))
+}
+format_pv <- function(pvs) lapply(X = pvs, FUN = format_pvi) %>% unlist()
+# Tidy regression results table
+tidy_table <- function(x, terms, highlight_row = 1, highlight_color = "black", highlight_bold = T, digits = c(NA, 3, 3, 2, 5), title = NULL) {
+  x %>%
+    tidy() %>%
+    select(1:5) %>%
+    mutate(
+      term = terms,
+      p.value = p.value %>% format_pv()
+    ) %>%
+    kable(
+      col.names = reg_columns,
+      escape = F,
+      digits = digits,
+      caption = title
+    ) %>%
+    kable_styling(font_size = 20) %>%
+    row_spec(1:nrow(tidy(x)), background = "white") %>%
+    row_spec(highlight_row, bold = highlight_bold, color = highlight_color)
+}
+```
+
+```{css, echo = F, eval = F}
+@media print {
+  .has-continuation {
+    display: block !important;
+  }
+}
+```
+
+layout: false
+.smallest[
+.pull-left[
+# This Week's Class
+1. [Graphing](#graph)
+2. [Equations](#eq)
+3. [Practice Problems](#qs)
+]
+.pull-right[
+# Some useful stuff we'll learn about today
+1. [Slope](#slope)
+2. [Equations for Lines](#eql)
+3. [Tangency](#tang)
+4. [Solving SOEs](#subs)
+]
+]
+---
+class: inverse, middle
+layout: false
+name:math
+# Math Review
+---
+layout:true
+name: graph
+---
+# Graphing - Basic Definitions
+- .hi[Variable:] quantity that can take on more than one value (hence "variable")
+  - Example: __income__ for one person may be $100K, another $25K
+
+--
+  
+- .hi[Units:] what is being measured. **Very important** to help identify what we are seeing. 
+  - Example: __annual income per capita in $1,000's__ 
+  (_Source:_ [FRED](https://fred.stlouisfed.org/series/A792RC0Q052SBEA))
+  
+
+--
+
+```{r, echo=F, fig.height = 3.5, dev.args = list(bg = 'transparent')}
+inc=getSymbols('A792RC0Q052SBEA',src='FRED', auto.assign=F)
+inc = data.frame(date=time(inc), coredata(inc))
+names(inc)[names(inc) == "A792RC0Q052SBEA"] <- "income"
+inc$income<-inc$income/1000
+ggplot(data=inc, aes(x=date,y=income)
+      )+geom_line(size=1.1,color="#cc5500")+labs(x="") + 
+    ylab(expression(atop("Personal Income per", paste("Capita in Thousands"))))+ 
+   geom_rangeframe()+
+  theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 20, colour="black"), 
+        axis.text.y = element_text(size = 20, colour="black"),  panel.grid.major = element_blank(), 
+     panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "transparent"), # bg of the panel
+    plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+    legend.background = element_rect(fill = "transparent"), # get rid of legend bg
+    legend.box.background = element_rect(fill = "transparent"))+ # get rid of legend panel bg 
+  coord_cartesian(xlim=c(as.Date("2005-01-01"), max(inc$date+200)), ylim=c(35, max(inc$income)), expand=FALSE)
+```
+
+
+<br /><br /><br /><br /><br /> 
+
+---
+
+# Things that matter
+- Labels: tell us what is what
+- Units: tell us how things are measured
+- Scale: Affects what we see and therefore what we infer from th epicture
+
+---
+
+# Scale
+.center2[
+  .pull-left[
+    ```{r, echo=F, fig.height = 10, dev.args = list(bg = 'transparent')}
+inc=getSymbols('A792RC0Q052SBEA',src='FRED', auto.assign=F)
+inc = data.frame(date=time(inc), coredata(inc))
+names(inc)[names(inc) == "A792RC0Q052SBEA"] <- "income"
+inc$income<-inc$income/1000
+ggplot(data=inc, aes(x=date,y=income)
+      )+geom_line(size=4,color="#cc5500")+labs(x="") + 
+    ylab(expression(atop("Personal Income per", paste("Capita in Thousands"))))+ 
+   geom_rangeframe()+
+  theme(text = element_text(size = 20),axis.title=element_text(size=42), axis.text.x = element_text(size = 42, colour="black"), 
+        axis.text.y = element_text(size = 42, colour="black"),  panel.grid.major = element_blank(), 
+     panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "transparent"), # bg of the panel
+    plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+    legend.background = element_rect(fill = "transparent"), # get rid of legend bg
+    legend.box.background = element_rect(fill = "transparent"))+ # get rid of legend panel bg 
+  coord_cartesian(xlim=c(as.Date("2005-01-01"), max(inc$date+200)), ylim=c(35, max(inc$income)), expand=FALSE)
+```
+
+  ]
+  .pull-right[
+    ```{r, echo=F, fig.height = 10, dev.args = list(bg = 'transparent')}
+inc=getSymbols('A792RC0Q052SBEA',src='FRED', auto.assign=F)
+inc = data.frame(date=time(inc), coredata(inc))
+names(inc)[names(inc) == "A792RC0Q052SBEA"] <- "income"
+inc$income<-inc$income/1000
+ggplot(data=inc, aes(x=date,y=income)
+      )+geom_line(size=4,color="#cc5500")+labs(x="") + 
+    ylab(expression(atop("Personal Income per", paste("Capita in Thousands"))))+ 
+   geom_rangeframe()+
+  theme(text = element_text(size = 20),axis.title=element_text(size=42), axis.text.x = element_text(size = 42, colour="black"), 
+        axis.text.y = element_text(size = 42, colour="black"),  panel.grid.major = element_blank(), 
+     panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "transparent"), # bg of the panel
+    plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+    legend.background = element_rect(fill = "transparent"), # get rid of legend bg
+    legend.box.background = element_rect(fill = "transparent"))+ # get rid of legend panel bg 
+  coord_cartesian(xlim= c(min(inc$date), max(inc$date+200)), ylim=c(0, max(inc$income)), expand=FALSE)
+```
+  ]
+]
+
+---
+# Graphing - Basic Definitions
+
+## Variables: 
+- We just showed you income. What if we are interested in the relationship between .pink[income] and .pink[years of schooling]?
+
+.hi[Two Variables]
+
+Common convention (i.e., no specific meaning to it) in math:
+- Call one variable the .ul[x-variable]
+  - Put this one on the horizontal axis
+- Call the other the .ul[y-variable]
+  -This one on the vertical axis
+---
+# Example: Two Y-variables, One X-variable
+
+```{r, echo=F, fig.height = 6.5, dev.args = list(bg = 'transparent')}
+educKR <- wb(country="KR", indicator="SE.PRM.CMPT.FE.ZS", startdate=1999, enddate=2017)
+educEG <- wb(country="EG", indicator="SE.PRM.CMPT.FE.ZS", startdate=1999, enddate=2017)
+incpcKR <- wb(country="KR", indicator="NY.GNP.PCAP.CD", startdate=1999, enddate=2017)
+incpcEG <- wb(country="EG", indicator="NY.GNP.PCAP.CD", startdate=1999, enddate=2017)
+incpcKR$value <- incpcKR$value/1000
+incpcEG$value <- incpcEG$value/1000
+egypt <-merge(educEG, incpcEG,by="date")
+korea <-merge(educKR, incpcEG,by="date")
+
+ggplot()+geom_smooth(data=egypt, aes(x=value.x,y=value.y, color = 'b'), size=1.1, se=F)+geom_smooth(data=korea, aes(x=value.x,y=value.y,color='o'), size=1.1, se=F) + coord_cartesian(xlim= c(90, 100), expand=FALSE) + labs(x="Female Primary Educ. Completion Rate  (%)")+
+      ylab(expression(atop("Nominal Income per Capita",paste("in US $1,000s")))) +
+     geom_rangeframe()+
+  theme(text = element_text(size = 20),axis.title=element_text(size=32), axis.text.x = element_text(size = 32, colour="black"), 
+        axis.text.y = element_text(size = 32, colour="black"),  
+        panel.grid.major = element_blank(), 
+     panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "transparent"), # bg of the panel
+    plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+    legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+    legend.box.background = element_rect(fill = "transparent"),
+    axis.line = element_line(size = 1), ) + # get rid of legend panel bg 
+    scale_colour_manual(name="Country", values = c('b'='blue','o'='orange'), labels = c("Egypt", "Korea")) 
+```
+--
+.hi[.ul[Note:] the lines here represent the connection of points (e.g. 90% and $1,490 for Egypt)]
+---
+# .hi[An aside...]
+
+.pull-left[
+```{r, echo=F, fig.height = 6, dev.args = list(bg = 'transparent')}
+educKR <- wb(country="KR", indicator="SE.PRM.CMPT.FE.ZS", startdate=1999, enddate=2017)
+educEG <- wb(country="EG", indicator="SE.PRM.CMPT.FE.ZS", startdate=1999, enddate=2017)
+incpcKR <- wb(country="KR", indicator="NY.GNP.PCAP.CD", startdate=1999, enddate=2017)
+incpcEG <- wb(country="EG", indicator="NY.GNP.PCAP.CD", startdate=1999, enddate=2017)
+incpcKR$value <- incpcKR$value/1000
+incpcEG$value <- incpcEG$value/1000
+egypt <-merge(educEG, incpcEG,by="date")
+korea <-merge(educKR, incpcEG,by="date")
+
+ggplot()+geom_smooth(data=egypt, aes(x=value.x,y=value.y, color = 'b'), size=1.1, se=F)+geom_smooth(data=korea, aes(x=value.x,y=value.y,color='o'), size=1.1, se=F) + coord_cartesian(xlim= c(90, 100), expand=FALSE) + labs(x="Female Primary Educ. Completion Rate  (%)")+
+      ylab(expression(atop("Nominal Income per Capita",paste("in US $1,000s")))) +
+     geom_rangeframe()+
+  theme(text = element_text(size = 20),axis.title=element_text(size=32), axis.text.x = element_text(size = 32, colour="black"), 
+        axis.text.y = element_text(size = 32, colour="black"),  
+        panel.grid.major = element_blank(), 
+     panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "transparent"), # bg of the panel
+    plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+    legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+    legend.box.background = element_rect(fill = "transparent"),
+    axis.line = element_line(size = 1), ) + # get rid of legend panel bg 
+    scale_colour_manual(name="Country", values = c('b'='blue','o'='orange'), labels = c("Egypt", "Korea")) 
+```
+- .ul[inflation] - rate of growth of prices in economy
+  - higher inflation rate -> faster cost of living rises
+]
+
+.pull-right[
+
+- We may be interested in adjusting variables based on this relative cost of living: called defating the variable
+
+- .ul[real] $'s (income, prices, etc.) - deflated to account for inflation
+
+- .ul[nominal] $'s (income, prices, etc.) - undeflated -> like the actual value at the time
+]
+
+---
+# Inflation vs. PPP: .hi[Big Mac Index 🍔 💵]
+<iframe src="https://public.tableau.com/views/TheBigMacIndex/TheBigMacIndex?:embed=y&amp;:loadOrderID=0&amp;:display_count=no&amp;:showTabs=y&amp;:showVizHome=no" width="845" height="555"></iframe>
+
+---
+# Two Axis Graph
+
+```{r, echo=F, fig.height = 6, dev.args = list(bg = 'transparent')}
+infmort <- wb(country="CH", indicator="SP.DYN.IMRT.IN", startdate=1970, enddate=2017)
+educ <- wb(country="CH", indicator="SE.PRM.CMPT.FE.ZS", startdate=1970, enddate=2017)
+incpc <- wb(country="CH", indicator="NY.GNP.PCAP.CD", startdate=1999, enddate=2017)
+incpc$value <- incpc$value/1000
+temp <-merge(educ, incpc, by="date")
+chdata <-merge(temp,infmort,by="date")
+
+ggplot(chdata, aes(x=value.x))+
+  geom_smooth(aes(y=value.y, colour = "Income pc"), size=1.1, se=F)+
+  geom_smooth(aes(y=value*12,color='Infant Mort.'), size=1.1, se=F) + 
+    coord_cartesian(xlim= c(94.5, 100), expand=FALSE) + scale_y_continuous(
+      name = ,
+      sec.axis = sec_axis(~.*.08,name="Infant Mortality Rate (Deaths per 1,000)")
+    ) +  scale_colour_manual(values = c("blue", "red")) + labs(y = expression(atop("Nominal Income per Capita",paste("in US $1,000s"))),
+      x = "Female Primary Educ. Completion Rate (%)",
+      colour = "")+
+  theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1) )  # get rid of legend panel bg 
+```
+---
+# Types of Curves
+
+.ul[curve] - any line connecting points on a graph
+
+ - (doesn't have to be straight, but maybe)
+
+--
+
+- straight: .ul[linear relationship]
+```{r, echo=F, fig.height = 4, dev.args = list(bg = 'transparent')}
+d=data.frame(x=c(60,80,80,100,100,120), y=c(20,20,60,60,100,100))
+x=seq(from = 60, to = 120, by = 1)
+y=(4/3)*x-60
+dat = data.frame(x = x, y = y)
+ggplot(dat,aes(x,y)) +stat_function(fun=function(x) (4/3)*x-60)+xlim(60,120) + labs(y = expression(atop("Air Conditioning Use",paste("in MWh/day"))),  x = "Outside Temp. in deg. F", colour = "")+
+  theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1) )  # get rid of legend panel bg 
+```
+
+
+---
+# Types of Curves
+.ul[curve] - any line connecting points on a graph
+ - (doesn't have to be straight, but maybe)
+ - straight: .ul[linear relationship]
+ - curved: .ul[non-linear relationsip]
+
+
+```{r, echo=F, fig.height = 4, dev.args = list(bg = 'transparent')}
+d=data.frame(x=c(60,80,80,100,100,120), y=c(20,20,60,60,100,100))
+x=seq(from = 60, to = 120, by = 1)
+y=(4/3)*x-60
+dat = data.frame(x = x, y = y)
+p<-ggplot(dat,aes(x,y))+ geom_curve(aes(x = 60, y = 20, xend = 120, yend = 100),curvature = 0.15, angle = -45)
+p+ labs(y = expression(atop("Air Conditioning Use",paste("in MWh/day"))),
+                                                                x = "Outside Temp. in deg. F",
+                                                                colour = "")+
+  theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1) )  # get rid of legend panel bg 
+```
+
+---
+# Types of Curves
+.ul[curve] - any line connecting points on a graph
+ - (doesn't have to be straight, but maybe)
+ - straight: .ul[linear relationship]
+ - curved: .ul[non-linear relationsip]
+ - something else (here .hl[piece-wise linear])
+
+```{r, echo=F, fig.height = 4, dev.args = list(bg = 'transparent')}
+d=data.frame(x=c(60,80,80,100,100,120), y=c(20,20,60,60,100,100))
+x=seq(from = 60, to = 120, by = 1)
+y=(4/3)*x-60
+dat = data.frame(x = x, y = y)
+p<-ggplot(dat,aes(x,y))+geom_step(data=d, mapping=aes(x=x, y=y)) +
+  geom_step(data=d, mapping=aes(x=x, y=y), direction="vh", linetype="dotted", colour = "blue") +
+  geom_point(data=d, mapping=aes(x=x, y=y), color="red")
+p+ xlim(60,120) + labs(y = expression(atop("Air Conditioning Use",paste("in MWh/day"))),
+                                                                x = "Outside Temp. in deg. F",
+                                                                colour = "")+
+  theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1) )  # get rid of legend panel bg 
+```
+
+---
+# Relationships between Variables
+
+```{r, echo=F, fig.height = 6, dev.args = list(bg = 'transparent')}
+d=data.frame(x=c(60,80,80,100,100,120), y=c(20,20,60,60,100,100))
+x=seq(from = 60, to = 120, by = 1)
+y=(4/3)*x-60
+dat = data.frame(x = x, y = y)
+p<-ggplot(dat,aes(x,y))+geom_step(data=d, mapping=aes(x=x, y=y)) +
+  geom_step(data=d, mapping=aes(x=x, y=y), direction="vh", linetype="dotted", colour = "blue") +
+  geom_point(data=d, mapping=aes(x=x, y=y), color="red")+ geom_curve(aes(x = 60, y = 20, xend = 120, yend = 100),curvature = 0.15, angle = -45)
+p+stat_function(fun=function(x) (4/3)*x-60)+xlim(60,120) + labs(y = expression(atop("Air Conditioning Use",paste("in MWh/day"))),
+                                                                x = "Outside Temp. in deg. F", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1) )  # get rid of legend panel bg 
+```
+
+ - These are .hi[all] .ul[positive relationships]: as the temps increase, so too does A/C use
+
+---
+
+# Negative Relationships
+
+ - as the temps increase, indoor heating use .hi[goes down]
+ 
+```{r, echo=F, fig.height = 6, dev.args = list(bg = 'transparent')}
+x=seq(from = 10, to = 70, by = 1)
+y=-(4/3)*x-60
+dat = data.frame(x = x, y = y)
+ggplot(dat,aes(x,y)) +stat_function(fun=function(x) -(4/3)*x+60)+xlim(10,70) + labs(y = expression(atop("Indoor Heating Use",paste("in MWh/day"))),  x = "Outside Temp. in deg. F", colour = "")+
+  theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1) )  # get rid of legend panel bg 
+```
+
+---
+
+# Important Characteristics
+
+ - Sometimes useful to know where graph intersects axes (things with the numbers on them)
+ 
+--
+
+ - .hi[Common] to call the horizontal axis .ul["x-axis"] & vertical axis .ul["y-axis"]
+
+
+```{r, echo=F, fig.height = 4, dev.args = list(bg = 'transparent')}
+x=seq(from = 0, to = 35, by = 1)
+y=.95*x+5
+dat = data.frame(x = x, y = y)
+ggplot(dat,aes(x,y)) +stat_function(fun=function(x) .95*x+5) + ylim(0,35)+ labs(y = "y - Price of Water in $s",  x = " x - Gallons of Water", colour = "")+
+  theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1))+ expand_limits(x = 0, y = 0)+ scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0), breaks=c(0,5,15,25,35))
+```
+---
+name:eql
+# Y-intercept
+
+ - vertical intercept (aka y-intercept) at $5 per gallon 
+
+ 
+```{r, echo=F, fig.height = 4, dev.args = list(bg = 'transparent')}
+x=seq(from = 0, to = 35, by = 1)
+y=.95*x+5
+dat = data.frame(x = x, y = y)
+ggplot(dat,aes(x,y)) +stat_function(fun=function(x) .95*x+5) + ylim(0,35)+ labs(y = "y - Price of Water in $s",  x = " x - Gallons of Water", colour = "")+
+  theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1))+ expand_limits(x = 0, y = 0)+ scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0), breaks=c(0,5,15,25,35))+ annotate("segment", x = 3, xend = .2, y = 18, yend = 6, colour = "purple", size=1,  arrow=arrow()) +
+  annotate("text", x = 5, y =22 , 
+           label = "y-intercept" , color="purple", 
+           size=7 , angle=25, fontface="bold")
+```
+
+--
+ - This tells us the price of the .hi[.ul[first]] gallon of water
+---
+# X-intercept
+
+
+```{r, echo=F, fig.height = 5, dev.args = list(bg = 'transparent')}
+x=seq(from = 0, to = 4, by = .1)
+y=-2*x+8
+dat = data.frame(x = x, y = y)
+ggplot(dat,aes(x,y)) +stat_function(fun=function(x) -2*x+8) +  labs(y = "y - Price of Popsicles in $s",  x = " x - # of Popsicles", colour = "")+
+  theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1))+ expand_limits(x = 0, y = 0)+ 
+        scale_x_continuous(expand = c(0, 0), limits=c(0,5)) + scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+ 
+        annotate("segment", x = 4, xend = 4, y = 3, yend = .5, colour = "purple", size=1,  arrow=arrow()) +
+        annotate("text", x = 4, y =4 ,  label = "x-intercept" , color="purple", size=7 ,  fontface="bold")
+``` 
+
+---
+# X-intercept
+
+ - horizontal intercept (aka y-intercept) at 4 popsicles
+
+```{r, echo=F, fig.height = 5, dev.args = list(bg = 'transparent')}
+x=seq(from = 0, to = 4, by = .1)
+y=-2*x+8
+dat = data.frame(x = x, y = y)
+ggplot(dat,aes(x,y)) +stat_function(fun=function(x) -2*x+8) +  labs(y = "y - Price of Popsicles in $s",  x = " x - # of Popsicles", colour = "")+
+  theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1))+ expand_limits(x = 0, y = 0)+ 
+        scale_x_continuous(expand = c(0, 0), limits=c(0,5)) + scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+ 
+        annotate("segment", x = 4, xend = 4, y = 3, yend = .5, colour = "purple", size=1,  arrow=arrow()) +
+        annotate("text", x = 4, y =4 ,  label = "x-intercept" , color="purple", size=7 ,  fontface="bold")
+```
+
+--
+
+ - I won't be adding "x" and "y" to the axes from here on, just remember which is whiche
+
+---
+# Slope
+name: slope
+
+ - How does the y-variable change as I change the x variable?
+ 
+--
+ 
+ - Sounds boring, but one of the most used characteristics in this class
+  - The slope often represents some policy relevant change
+  - How will cigarette consumption change if we tax them by $4 per pack?
+--
+
+  - Let's look at data of how cigarette consumption changes with price...
+
+---
+# Useful thing to consider...
+
+.orange[Causal Relationship]
+
+```{r, echo=F, fig.height = 3, dev.args = list(bg = 'transparent')}
+d=data.frame(x=c(60,80,80,100,100,120), y=c(20,20,60,60,100,100))
+x=seq(from = 60, to = 120, by = 1)
+y=(4/3)*x-60
+dat = data.frame(x = x, y = y)
+p<-ggplot(dat,aes(x,y))+
+     geom_curve(aes(x = 60, y = 20, xend = 120, yend = 100),curvature = 0.15, angle = -45)
+p + labs(y = expression(atop("Air Conditioning Use",paste("in MWh/day"))),
+                                                                x = "Outside Temp. in deg. F", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1) )  # get rid of legend panel bg 
+```
+--
+.orange[Non-Causal Relationship]
+```{r, echo=F, fig.height = 3, dev.args = list(bg = 'transparent')}
+d=data.frame(x=c(60,80,80,100,100,120), y=c(20,20,60,60,100,100))
+x=seq(from = 60, to = 120, by = 1)
+y=(4/3)*x-60
+dat = data.frame(x = x, y = y)
+p<-ggplot(dat,aes(x,y))+
+     geom_curve(aes(x = 60, y = 20, xend = 120, yend = 100),curvature = 0.15, angle = -45)
+p+labs(y =expression(atop("SAT Prep Class",paste("Enrollment"))),
+                                                                x = "Outside Temp. in deg. F", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1) )  # get rid of legend panel bg 
+```
+---
+# Cigarette consumption vs. Price
+
+ - Say price is now $6 and 12 packs are consumed
+ - If we tax cigarettes by $4 per pack, then the price per pack raises to $10
+ - The line shows only 4 packs are consumed under this higher price
+
+```{r, echo=F, fig.height = 4, dev.args = list(bg = 'transparent')}
+x=seq(from = 2, to = 13, by = 1)
+y=-.5*x+12
+dat = data.frame(x = x, y = y)
+ggplot(dat,aes(x,y)) +stat_function(fun=function(x) -.5*x+12) +  labs(y = "Price per Pack in $s",  x = "Cigarette Packs", colour = "")+
+  theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1))+ expand_limits(x = 0, y = 0)+ 
+        scale_x_continuous(expand = c(0, 0), limits=c(0,15),breaks=c(0,4,12)) + 
+        scale_y_continuous(expand = c(0, 0),limits = c(0, 14),breaks=c(0,6,10)) +
+        annotate("point",x=c(4,12),y=c(10,6), color="red",size=3) +
+        annotate("segment", x = c(4,12,0,0), xend = c(4,12,4,12), y = c(0,0,10,6), yend = c(10,6,10,6),linetype = "dashed")
+```
+
+---
+
+layout: false
+class: top,clear
+ 
+```{r, echo=F, fig.height = 4, dev.args = list(bg = 'transparent')}
+x=seq(from = 2, to = 13, by = 1)
+y=-.5*x+12
+dat = data.frame(x = x, y = y)
+ggplot(dat,aes(x,y)) +stat_function(fun=function(x) -.5*x+12) +  labs(y = "Price per Pack in $s",  x = "Cigarette Packs", colour = "")+
+  theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1))+ expand_limits(x = 0, y = 0)+ 
+        scale_x_continuous(expand = c(0, 0), limits=c(0,15),breaks=c(0,4,12)) + 
+        scale_y_continuous(expand = c(0, 0),limits = c(0, 14),breaks=c(0,6,10)) +
+        annotate("point",x=c(4,12),y=c(10,6), color="red",size=3) +
+        annotate("segment", x = c(4,12,0,0), xend = c(4,12,4,12), y = c(0,0,10,6), yend = c(10,6,10,6),linetype = "dashed")+
+        annotate("segment", x = c(3.9,3.9,3.7), xend = c(3.7,3.7,3.7), y = c(10,6,10), yend = c(10,6,6),color="red") +
+        annotate("segment", x = c(4,12,4), xend = c(4,12,12), y = c(5.9,5.9,5.5), yend = c(5.5,5.5,5.5),color="red") +
+         annotate("text", x = c(8,2), y = c(4,8), label = c("8 fewer packs", "$4 per pack tax") , color="red", size=7 , fontface="bold")
+```
+
+ - Slope - change in y variable divided by change in x variable
+ .pull-left[
+ in Math: $$m=\frac{\Delta Y}{\Delta X} = \frac{Y_2-Y_1}{X_2-X_1},$$
+ ]
+ 
+---
+layout: false
+class: top,clear
+ 
+```{r, echo=F, fig.height = 4, dev.args = list(bg = 'transparent')}
+x=seq(from = 2, to = 13, by = 1)
+y=-.5*x+12
+dat = data.frame(x = x, y = y)
+ggplot(dat,aes(x,y)) +stat_function(fun=function(x) -.5*x+12) +  labs(y = "Price per Pack in $s",  x = "Cigarette Packs", colour = "")+
+  theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1))+ expand_limits(x = 0, y = 0)+ 
+        scale_x_continuous(expand = c(0, 0), limits=c(0,15),breaks=c(0,4,12)) + 
+        scale_y_continuous(expand = c(0, 0),limits = c(0, 14),breaks=c(0,6,10)) +
+        annotate("point",x=c(4,12),y=c(10,6), color="red",size=3) +
+        annotate("segment", x = c(4,12,0,0), xend = c(4,12,4,12), y = c(0,0,10,6), yend = c(10,6,10,6),linetype = "dashed")+
+        annotate("segment", x = c(3.9,3.9,3.7), xend = c(3.7,3.7,3.7), y = c(10,6,10), yend = c(10,6,6),color="red") +
+        annotate("segment", x = c(4,12,4), xend = c(4,12,12), y = c(5.9,5.9,5.5), yend = c(5.5,5.5,5.5),color="red") +
+         annotate("text", x = c(8,2), y = c(4,8), label = c("8 fewer packs", "$4 per pack tax") , color="red", size=7 , fontface="bold")
+```
+
+ .hi[Slope] - change in y variable divided by change in x variable
+ .pull-left[
+in Math: $$m=\frac{\Delta Y}{\Delta X} = \frac{Y_2-Y_1}{X_2-X_1},$$
+ ]
+
+ 
+ .pull-right[
+for this graph:  $$Slope = \frac{6-10}{12-4}=\frac{-4}{8}=-.5$$
+  ]
+
+--
+
+.hi[Careful:] Need to be consistent about order of x's and y's
+ 
+---
+layout: false
+class: top,clear
+ 
+```{r, echo=F, fig.height = 4, dev.args = list(bg = 'transparent')}
+x=seq(from = 2, to = 13, by = 1)
+y=-.5*x+12
+dat = data.frame(x = x, y = y)
+ggplot(dat,aes(x,y)) +stat_function(fun=function(x) -.5*x+12) +  labs(y = "Price per Pack in $s",  x = "Cigarette Packs", colour = "")+
+  theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1))+ expand_limits(x = 0, y = 0)+ 
+        scale_x_continuous(expand = c(0, 0), limits=c(0,15),breaks=c(0,4,12)) + 
+        scale_y_continuous(expand = c(0, 0),limits = c(0, 14),breaks=c(0,6,10)) +
+        annotate("point",x=c(4,12),y=c(10,6), color="red",size=3) +
+        annotate("segment", x = c(4,12,0,0), xend = c(4,12,4,12), y = c(0,0,10,6), yend = c(10,6,10,6),linetype = "dashed")+
+        annotate("segment", x = c(3.9,3.9,3.7), xend = c(3.7,3.7,3.7), y = c(10,6,10), yend = c(10,6,6),color="red") +
+        annotate("segment", x = c(4,12,4), xend = c(4,12,12), y = c(5.9,5.9,5.5), yend = c(5.5,5.5,5.5),color="red") +
+         annotate("text", x = c(8,2), y = c(4,8), label = c("8 fewer packs", "$4 per pack tax") , color="red", size=7 , fontface="bold")
+```
+
+ .hi[Slope] - change in y variable divided by change in x variable
+ .pull-left[
+in Math: $$m=\frac{\Delta Y}{\Delta X} = \frac{Y_2-Y_1}{X_2-X_1},$$
+ ]
+
+ 
+ .pull-right[
+for this graph:  $$Slope = \frac{6-10}{12-4}=\frac{-4}{8}=-.5$$
+  ]
+
+.hi[Note:] often we denote slope by the letter .hi[m]
+
+---
+layout: true
+
+# Non-linear Curves
+
+beziers <- data.frame(
+  x = c(1, 2, 3, 4, 4, 6, 6),
+  y = c(0, 2, 0, 0, 2, 2, 0),
+  type = rep(c('cubic', 'quadratic'), c(3, 4)),
+  point = c('end', 'control', 'end', 'end', 'control', 'control', 'end'),
+  colour = letters[1:7]
+)
+
+
+---
+layout: false
+class: top,clear
+
+```{r, echo=F, fig.height = 4, dev.args = list(bg = 'transparent')}
+x=seq(from = 2, to = 13, by = 1)
+y=-.5*x+12
+dat = data.frame(x = x, y = y)
+ggplot(dat,aes(x,y)) +stat_function(fun=function(x) -.5*x+12) +  labs(y = "Price per Pack in $s",  x = "Cigarette Packs", colour = "")+
+  theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+        axis.text.y = element_text(size = 18, colour="black"),  
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+        plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+        legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+        legend.box.background = element_rect(fill = "transparent"),
+        axis.line = element_line(size = 1))+ expand_limits(x = 0, y = 0)+ 
+        scale_x_continuous(expand = c(0, 0), limits=c(0,15),breaks=c(0,4,12)) + 
+        scale_y_continuous(expand = c(0, 0),limits = c(0, 14),breaks=c(0,6,10)) +
+        annotate("point",x=c(4,12),y=c(10,6), color="red",size=3) +
+        annotate("segment", x = c(4,12,0,0), xend = c(4,12,4,12), y = c(0,0,10,6), yend = c(10,6,10,6),linetype = "dashed")+
+        annotate("segment", x = c(3.9,3.9,3.7), xend = c(3.7,3.7,3.7), y = c(10,6,10), yend = c(10,6,6),color="red") +
+        annotate("segment", x = c(4,12,4), xend = c(4,12,12), y = c(5.9,5.9,5.5), yend = c(5.5,5.5,5.5),color="red") +
+         annotate("text", x = c(8,2), y = c(4,8), label = c("8 fewer packs", "$4 per pack tax") , color="red", size=7 , fontface="bold")
+```
+
+$$Slope = \frac{6-10}{12-4}=\frac{-4}{8}=-.5$$
+.hi[Interpretation:] Every $1 increase in price, demand for cigs falls by $\frac{1}{2}$
+
+--
+
+.hi[Note:] Along a straight line, the slope is the same at every point!
+---
+layout: true
+```{r, echo=F, fig.height = 3, dev.args = list(bg = 'transparent')}
+
+```
+
+
+---
+layout: false
+class: top,clear
+
+Along a non-straight curve, the slope may vary from point to point
+```{r, echo=F, fig.height = 6, dev.args = list(bg = 'transparent')}
+df <- data.frame(
+  x = c(2, 6, 10, 11),
+  y = c(1, 2, 7, 10))
+ggplot(df,aes(x=x,y=y))+
+  geom_point(size=3,color="red") +  geom_smooth(method = "loess",span=1.1,se = FALSE)+
+  labs(y ="y",  x = "x", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+  axis.text.y = element_text(size = 18, colour="black"),  
+  panel.grid.major = element_blank(), 
+  panel.grid.minor = element_blank(),
+  panel.background = element_rect(fill = "transparent"), # bg of the panel
+  plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+  legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+  legend.box.background = element_rect(fill = "transparent"),
+  axis.line = element_line(size = 1) ) + # get rid of legend panel bg 
+  expand_limits(x = 0, y = 0)+ 
+  scale_x_continuous(expand = c(0, 0), limits=c(0,13),breaks=seq(from = 0, to = 12, by = 1)) + 
+  scale_y_continuous(expand = c(0, 0),limits = c(0, 13),breaks=seq(from = 0, to = 12, by = 1)) +
+  annotate("segment", x = c(2,0,6,0,10,0,11,0), xend = c(2,2,6,6,10,10,11,11), y = c(0,1,0,2,0,7,0,10), yend = c(1,1,2,2,7,7,10,10),linetype = "dashed")+
+  annotate("segment", x = c(2.1,2.1,5.9,6.1,6.1,6.3,10.1,10.1,10.9,11.1,11.1,11.3), 
+                   xend = c(2.1,5.9,5.9,6.3,6.3,6.3,10.1,10.9,10.9,11.3,11.3,11.3), 
+                      y = c(1  ,.7 ,.7 ,1  ,2  ,1  , 6.9, 6.7, 6.7, 7  ,10  ,7), 
+                   yend = c(.7 ,.7 , 1 ,1  ,2  ,2  , 6.7, 6.7, 6.9, 7  ,10  ,10),color = "red")+
+  annotate("text", x = c(5,6.5,10.5,11.5), y = c(.5,1.5,6.5,8.5), label = c("4", "2","1","3") , color="red", size=7 , fontface="bold")
+```
+
+---
+layout: false
+class: top,clear
+
+.hi[The slope...]
+ 1. Not the same at every point
+ 2. Gets larger _(in this case)_
+ 3. Always positive _(in this case)_
+```{r, echo=F, fig.height = 5, dev.args = list(bg = 'transparent')}
+df <- data.frame(
+  x = c(2, 6, 10, 11),
+  y = c(1, 2, 7, 10))
+ggplot(df,aes(x=x,y=y))+
+  geom_point(size=3,color="red") +  geom_smooth(method = "loess",span=1.1,se = FALSE)+
+  labs(y ="y",  x = "x", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+  axis.text.y = element_text(size = 18, colour="black"),  
+  panel.grid.major = element_blank(), 
+  panel.grid.minor = element_blank(),
+  panel.background = element_rect(fill = "transparent"), # bg of the panel
+  plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+  legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+  legend.box.background = element_rect(fill = "transparent"),
+  axis.line = element_line(size = 1) ) + # get rid of legend panel bg 
+  expand_limits(x = 0, y = 0)+ 
+  scale_x_continuous(expand = c(0, 0), limits=c(0,13),breaks=seq(from = 0, to = 12, by = 1)) + 
+  scale_y_continuous(expand = c(0, 0),limits = c(0, 13),breaks=seq(from = 0, to = 12, by = 1)) +
+  annotate("segment", x = c(2,0,6,0,10,0,11,0), xend = c(2,2,6,6,10,10,11,11), y = c(0,1,0,2,0,7,0,10), yend = c(1,1,2,2,7,7,10,10),linetype = "dashed")+
+  annotate("segment", x = c(2.1,2.1,5.9,6.1,6.1,6.3,10.1,10.1,10.9,11.1,11.1,11.3), 
+                   xend = c(2.1,5.9,5.9,6.3,6.3,6.3,10.1,10.9,10.9,11.3,11.3,11.3), 
+                      y = c(1  ,.7 ,.7 ,1  ,2  ,1  , 6.9, 6.7, 6.7, 7  ,10  ,7), 
+                   yend = c(.7 ,.7 , 1 ,1  ,2  ,2  , 6.7, 6.7, 6.9, 7  ,10  ,10),color = "red")+
+  annotate("text", x = c(5,6.5,10.5,11.5), y = c(.5,1.5,6.5,8.5), label = c("4", "2","1","3") , color="red", size=7 , fontface="bold")
+```
+
+---
+layout: false
+class: top,clear
+
+Can draw graphs with positive slope where slope gets smaller
+```{r, echo=F, fig.height = 3, dev.args = list(bg = 'transparent')}
+df <- data.frame(
+  x = c(2, 4, 10, 11),
+  y = c(1, 5, 9, 9.25))
+ggplot(df,aes(x=x,y=y))+
+  geom_point(size=3,color="red") +  geom_smooth(method = "loess",span=1.1,se = FALSE)+
+  labs(y ="y",  x = "x", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+  axis.text.y = element_text(size = 18, colour="black"),  
+  panel.grid.major = element_blank(), 
+  panel.grid.minor = element_blank(),
+  panel.background = element_rect(fill = "transparent"), # bg of the panel
+  plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+  legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+  legend.box.background = element_rect(fill = "transparent"),
+  axis.line = element_line(size = 1) ) + # get rid of legend panel bg 
+  expand_limits(x = 0, y = 0)+ 
+  scale_x_continuous(expand = c(0, 0), limits=c(0,13),breaks=seq(from = 0, to = 12, by = 1)) + 
+  scale_y_continuous(expand = c(0, 0),limits = c(0, 13),breaks=seq(from = 0, to = 12, by = 1))
+```
+--
+Can draw graphs with negative slope where slope gets bigger/smaller
+```{r, echo=F, fig.height = 3, dev.args = list(bg = 'transparent')}
+
+df1 <- data.frame(
+  x = c(2, 4, 10, 11),
+  y = c(11, 6, 2, 1.9))
+df2 <- data.frame(
+  x = c(2, 4, 9, 9.2),
+  y = c(10 ,9.99, 2, 1))
+ggplot()+
+  geom_point(data=df1,aes(x=x,y=y),size=3,color="red")+
+  geom_point(data=df2,aes(x=x,y=y),size=3,color="red") + geom_smooth(data=df1,aes(x=x,y=y),
+method = "loess",span=1.1,se = FALSE,color="green")+   geom_smooth(data=df2,aes(x=x,y=y),method = "loess",span=1.1,se = FALSE,color="blue")+
+labs(y ="y",  x = "x", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"),   axis.text.y = element_text(size = 18, colour="black"),  
+                                          panel.grid.major = element_blank(), 
+                                          panel.grid.minor = element_blank(),
+                                          panel.background = element_rect(fill = "transparent"), # bg of the panel
+                                          plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+                                          legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+                                          legend.box.background = element_rect(fill = "transparent"),
+                                          axis.line = element_line(size = 1) ) + # get rid of legend panel bg 
+  expand_limits(x = 0, y = 0)+ 
+  scale_x_continuous(expand = c(0, 0), limits=c(0,13),breaks=seq(from = 0, to = 12, by = 2)) + 
+  scale_y_continuous(expand = c(0, 0),limits = c(0, 13),breaks=seq(from = 0, to = 12, by = 2))
+```
+---
+layout: false
+class: top,clear
+
+Can draw graphs where slope is both increasing and decreasing
+```{r, echo=F, fig.height = 6, dev.args = list(bg = 'transparent')}
+p <- ggplot(data = data.frame(x = 0), mapping = aes(x = x))
+fun.1 <- function(x) (x-5)^3+x+100
+p+stat_function(fun = fun.1) + 
+  labs(y ="y",
+       x = "x", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), 
+                                   axis.text.x =    element_text(size = 18, colour="black"), 
+                                   axis.text.y = element_text(size = 18, colour="black"),  
+                                   panel.grid.major = element_blank(), 
+                                   panel.grid.minor = element_blank(),
+                                   panel.background = element_rect(fill = "transparent"), # bg of the panel
+                                   plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+                                   legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+                                   legend.box.background = element_rect(fill = "transparent"),
+                                   axis.line = element_line(size = 1) ) + # get rid of legend panel bg 
+                      expand_limits(x = 0, y = 0) +scale_x_continuous(expand = c(0, 0),breaks=NULL,limits=c(0,10))+
+  scale_y_continuous(expand = c(0, 0),breaks=NULL) +
+  annotate("text", x = c(3,8), y = c(50,100), label = c("Decreasing", "Increasing") , color="red", size=7 , fontface="bold")
+```
+
+---
+layout: false
+class: top,clear
+
+Can draw graphs where slope is both positive and negative
+```{r, echo=F, fig.height = 6, dev.args = list(bg = 'transparent')}
+p <- ggplot(data = data.frame(x = 0), mapping = aes(x = x))
+fun.1 <- function(x) y=(x-4)^2+100
+fun.2 <- function(x) y=-(x-4)^2+10
+p+stat_function(fun = fun.1) + stat_function(fun = fun.2) +
+  annotate("point",x=c(4,4),y=c(100,10),color="blue",size=3)+
+  annotate("segment",x=c(1,1),y=c(100,10),xend=c(10,10),yend=c(100,10),linetype="dashed")+
+  annotate("segment",x=c(1,6),y=c(50,50),xend=c(4,4),yend=c(100,10),color="green", arrow=arrow())+
+  annotate("text", x = c(9,9), y = c(100,10), label = c("Zero Slope","Zero Slope"), 
+            color="blue", size=5 , fontface="bold")+
+  annotate("text", x=c(1,6),y=c(50,50), label = c("Max","Min") ,
+            color="green", size=5 , fontface="bold")+
+  labs(y ="y",
+       x = "x", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), 
+                                   axis.text.x =    element_text(size = 18, colour="black"), 
+                                   axis.text.y = element_text(size = 18, colour="black"),  
+                                   panel.grid.major = element_blank(), 
+                                   panel.grid.minor = element_blank(),
+                                   panel.background = element_rect(fill = "transparent"), # bg of the panel
+                                   plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+                                   legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+                                   legend.box.background = element_rect(fill = "transparent"),
+                                   axis.line = element_line(size = 1) ) + # get rid of legend panel bg 
+  expand_limits(x = 0, y = 0) +scale_x_continuous(expand = c(0, 0),breaks=NULL,limits=c(0,10))+
+  scale_y_continuous(expand = c(0, 0),breaks=NULL) +
+  annotate("text", x = c(1,8,1,8), y = c(.1,.1,120,120), label = c("Increasing","Decreasing","Decreasing", "Increasing") 
+           , color="red", size=5 , fontface="bold")
+```
+
+---
+layout: false
+class: top,clear
+name:tang
+Calculating Slope of a Curve at a Point
+
+```{r, echo=F, fig.height = 6, dev.args = list(bg = 'transparent')}
+df=data.frame(x1=5.5,x2=8,x3=13,y1=1.3,y2=3,y3=4.75)
+p <- ggplot(data = data.frame(x = 0), mapping = aes(x = x))
+fun.1 <- function(x) y=.5*x-1
+p+stat_function(fun = fun.1)  +  geom_curve(data=df,aes(x = x1, y = y1, xend = x2, yend = y2),angle=45, curvature=-.1, colour="red")+
+  annotate("segment",x=c(6,8,10,6,8,10),y=c(2,3,4,2,3,4),xend=c(6,8,10,0,0,0),yend=c(0,0,0,2,3,4),linetype="dashed")+
+  annotate("segment",xend=8.2,yend=3,x=12,y=3.5,arrow=arrow(),color="green") +
+  annotate("segment",x=c(6.1,6.1,9.9,10.1,10.3,10.1),
+                     y=c(2  ,1.9,2  ,2   ,2   , 4),
+                  xend=c(6.1,9.9,9.9, 10.3,10.3,10.3),
+                  yend=c(1.9,1.9,1.9, 2 , 4  , 4),color="orange")+
+  annotate("text",x=12,y=3.5,label=expression(atop("Point of",paste("Tangency"))), color="green", size=5 , fontface="bold")+
+  annotate("text",x=c(8,10.2),y=c(1.8,3),label=c("4","2"), color="orange", size=5 , fontface="bold")+
+  geom_curve(data=df,aes(x = x2, y = y2, xend = x3, yend = y3),angle=70, curvature=-.1, colour="red")+
+                     annotate("point",x=c(6,8,10),y=c(2,3,4),color="blue",size=3)+
+                                      labs(y ="y",
+                          x = "x", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), 
+                                                      axis.text.x =    element_text(size = 18, colour="black"), 
+                                                      axis.text.y = element_text(size = 18, colour="black"),  
+                                                      panel.grid.major = element_blank(), 
+                                                      panel.grid.minor = element_blank(),
+                                                      panel.background = element_rect(fill = "transparent"), # bg of the panel
+                                                      plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+                                                      legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+                                                      legend.box.background = element_rect(fill = "transparent"),
+                                                      axis.line = element_line(size = 1) ) + # get rid of legend panel bg 
+                     expand_limits(x = 0, y = 0) +scale_x_continuous(expand = c(0, 0),breaks=c(6,8,10),limits=c(0,15))+
+                     scale_y_continuous(expand = c(0, 0),breaks=c(2,3,4),limits=c(0,5))
+```
+Slope is $\frac{2}{4}=\frac{1}{2}$
+---
+layout: false
+class: top,clear
+
+Arc Method of Slope Calculation - calculate the slope of line connecting two points on curve
+```{r, echo=F, fig.height = 6, dev.args = list(bg = 'transparent')}
+df <- data.frame(
+  x = c(2, 6, 10, 11),
+  y = c(1, 2, 7, 10))
+ggplot(df,aes(x=x,y=y))+
+  geom_point(size=3,color="red") +  geom_smooth(method = "loess",span=1.1,se = FALSE)+
+  labs(y ="y",  x = "x", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), axis.text.x = element_text(size = 18, colour="black"), 
+                                            axis.text.y = element_text(size = 18, colour="black"),  
+                                            panel.grid.major = element_blank(), 
+                                            panel.grid.minor = element_blank(),
+                                            panel.background = element_rect(fill = "transparent"), # bg of the panel
+                                            plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+                                            legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+                                            legend.box.background = element_rect(fill = "transparent"),
+                                            axis.line = element_line(size = 1) ) + # get rid of legend panel bg 
+  expand_limits(x = 0, y = 0)+ 
+  scale_x_continuous(expand = c(0, 0), limits=c(0,13),breaks=seq(from = 0, to = 12, by = 1)) + 
+  scale_y_continuous(expand = c(0, 0),limits = c(0, 13),breaks=seq(from = 0, to = 12, by = 1)) +
+  annotate("segment", x = c(2,0,6,0,10,0,11,0), xend = c(2,2,6,6,10,10,11,11), y = c(0,1,0,2,0,7,0,10), yend = c(1,1,2,2,7,7,10,10),linetype = "dashed")+
+  annotate("segment", x = c(2.1,2.1,5.9,6.1,6.1,6.3,10.1,10.1,10.9,11.1,11.1,11.3), 
+           xend = c(2.1,5.9,5.9,6.3,6.3,6.3,10.1,10.9,10.9,11.3,11.3,11.3), 
+           y = c(1  ,.7 ,.7 ,1  ,2  ,1  , 6.9, 6.7, 6.7, 7  ,10  ,7), 
+           yend = c(.7 ,.7 , 1 ,1  ,2  ,2  , 6.7, 6.7, 6.9, 7  ,10  ,10),color = "red")+
+  annotate("text", x = c(5,6.5,10.5,11.5), y = c(.5,1.5,6.5,8.5), label = c("4", "2","1","3") , color="red", size=7 , fontface="bold")+
+annotate("text", x = c(8.5,11.5), y = c(1.5,11), label = c("Slope=.5", "Slope=3") , color="red", size=7 , fontface="bold")+
+  annotate("segment",x=c(2,10),y=c(1,7),xend=c(6,11),yend=c(2,10),linetype="dashed",color="green",size=2)
+```
+
+---
+layout: false
+class: top,clear
+Area Under a Line
+```{r, echo=F, fig.height = 6, dev.args = list(bg = 'transparent')}
+positions <- data.frame(
+  x = c(0,0,10),
+  y = c(4,2,2)
+)
+ggplot()+  geom_polygon(data=positions, aes(x = x, y = y,fill = "green"))+
+  geom_segment(aes(x = 0, y = 4, xend = 15, yend = 1))+
+  labs(y ="y",  x = "x", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), 
+        axis.text.x = element_text(size = 18, colour="black"), 
+       axis.text.y = element_text(size = 18, colour="black"),  
+       panel.grid.major = element_blank(), legend.position = "none",
+       panel.grid.minor = element_blank(),
+       panel.background = element_rect(fill = "transparent"), # bg of the panel
+       plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+       legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+       legend.box.background = element_rect(fill = "transparent"),
+       axis.line = element_line(size = 1) )+ # get rid of legend panel bg 
+  expand_limits(x = 0, y = 0)+ 
+  scale_x_continuous(expand = c(0, 0), limits=c(0,15),breaks=c(0,10)) + 
+  scale_y_continuous(expand = c(0, 0),limits = c(0, 5),breaks=c(0,2,4)) +
+  annotate("point", x=10,y=2) +annotate("segment",x=c(10,0),xend=c(10,10),y=c(0,2),yend=c(2,2))+
+  annotate("rect", xmin=0, xmax=10, ymin=0 , ymax=2, alpha=0.2, color="blue", fill="blue")+
+  geom_polygon(data=positions, aes(x = x, y = y,fill = "green"))
+```
+
+Area of the curve is 🔺 + ⬜
+
+---
+layout: false
+class: top,clear
+Area Under a Line
+```{r, echo=F, fig.height = 6, dev.args = list(bg = 'transparent')}
+positions <- data.frame(
+  x = c(0,0,10),
+  y = c(4,2,2)
+)
+ggplot()+  geom_polygon(data=positions, aes(x = x, y = y,fill = "green"))+
+  geom_segment(aes(x = 0, y = 4, xend = 15, yend = 1))+
+  labs(y ="y",  x = "x", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), 
+        axis.text.x = element_text(size = 18, colour="black"), 
+       axis.text.y = element_text(size = 18, colour="black"),  
+       panel.grid.major = element_blank(), legend.position = "none",
+       panel.grid.minor = element_blank(),
+       panel.background = element_rect(fill = "transparent"), # bg of the panel
+       plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+       legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+       legend.box.background = element_rect(fill = "transparent"),
+       axis.line = element_line(size = 1) )+ # get rid of legend panel bg 
+  expand_limits(x = 0, y = 0)+ 
+  scale_x_continuous(expand = c(0, 0), limits=c(0,15),breaks=c(0,10)) + 
+  scale_y_continuous(expand = c(0, 0),limits = c(0, 5),breaks=c(0,2,4)) +
+  annotate("point", x=10,y=2) +annotate("segment",x=c(10,0),xend=c(10,10),y=c(0,2),yend=c(2,2))+
+  annotate("rect", xmin=0, xmax=10, ymin=0 , ymax=2, alpha=0.2, color="blue", fill="blue")+
+  geom_polygon(data=positions, aes(x = x, y = y,fill = "green"))
+```
+
+Area of 🔺 = $\frac{1}{2} \times base \times height = .5 \times 10 \times (4-2) =10$
+---
+layout: false
+class: top,clear
+Area Under a Line
+```{r, echo=F, fig.height = 6, dev.args = list(bg = 'transparent')}
+positions <- data.frame(
+  x = c(0,0,10),
+  y = c(4,2,2)
+)
+ggplot()+  geom_polygon(data=positions, aes(x = x, y = y,fill = "green"))+
+  geom_segment(aes(x = 0, y = 4, xend = 15, yend = 1))+
+  labs(y ="y",  x = "x", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), 
+        axis.text.x = element_text(size = 18, colour="black"), 
+       axis.text.y = element_text(size = 18, colour="black"),  
+       panel.grid.major = element_blank(), legend.position = "none",
+       panel.grid.minor = element_blank(),
+       panel.background = element_rect(fill = "transparent"), # bg of the panel
+       plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+       legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+       legend.box.background = element_rect(fill = "transparent"),
+       axis.line = element_line(size = 1) )+ # get rid of legend panel bg 
+  expand_limits(x = 0, y = 0)+ 
+  scale_x_continuous(expand = c(0, 0), limits=c(0,15),breaks=c(0,10)) + 
+  scale_y_continuous(expand = c(0, 0),limits = c(0, 5),breaks=c(0,2,4)) +
+  annotate("point", x=10,y=2) +annotate("segment",x=c(10,0),xend=c(10,10),y=c(0,2),yend=c(2,2))+
+  annotate("rect", xmin=0, xmax=10, ymin=0 , ymax=2, alpha=0.2, color="blue", fill="blue")+
+  geom_polygon(data=positions, aes(x = x, y = y,fill = "green"))
+```
+
+Area of ⬜ : $base \times height = 10 \times 2 =20$
+
+🔺 + ⬜= 20 + 10 = 30
+---
+# Cartesian Coordinate System
+Express location of points on a graph in parentheses: (x-value, y-value)
+```{r, echo=F, fig.height = 4, dev.args = list(bg = 'transparent')}
+df <- data.frame(
+  x = c(1,3),
+  y = c(4,7)
+)
+ggplot()+  geom_point(data=df,aes(x=x,y=y),size=3)+
+  labs(y ="y",  x = "x", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), 
+        axis.text.x = element_text(size = 18, colour="black"), 
+       axis.text.y = element_text(size = 18, colour="black"),  
+       panel.grid.major = element_blank(), legend.position = "none",
+       panel.grid.minor = element_blank(),
+       panel.background = element_rect(fill = "transparent"), # bg of the panel
+       plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+       legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+       legend.box.background = element_rect(fill = "transparent"),
+       axis.line = element_line(size = 1) )+ # get rid of legend panel bg 
+  expand_limits(x = 0, y = 0)+ 
+  scale_x_continuous(expand = c(0, 0), limits=c(0,4),breaks=seq(from=0,to=10,by=2)) + 
+  scale_y_continuous(expand = c(0, 0),limits = c(0,10),breaks=seq(from=0,to=10,by=2)) +
+  annotate("text", x=c(1,3),y=c(3,6),label=c("(1,4)","(3,7)"),size=5 )
+```
+If we have two points, we may want to determine the line that connects them
+
+.center[.hi[HOW?]]
+---
+name: eqs
+# Equations, Expressions & Operators
+ - .ul[.hi[Variable:]] something that can take more than one value: $x=1,3,5,6$
+ - .ul[.hi[Operator:]] performs a mathematical operation
+  - Recall order of operations: .hi[P-E-M-D-A-S]
+   - (), $x^2$, $x\times y$, $\frac{\pi}{2}$, $🥕+🎂$, $x-3$
+ - .ul[.hi[Expression:]] any combination of mathematical symbols, variables, operators
+  - Ex.: $3+4$, $x^3$, $16$, $y+2$
+ - .ul[.hi[Equation:]] Relates a pair of expression using an equals sign ($=$) to state equality
+  - $2+2=4$, $x-3=y$
+  - Can express non-equality: $2+3\neq 4$
+  - Can express inequality: $2+3>4$, $1+6 \geq x$
+---
+# Representing lines
+## Slope-Intercept Form
+
+$$y= 3x+2$$
+.center[y-var. = slope * x + y-intercept (AKA $y=mx+b$)]
+ - m = 3 is the slope
+ - b = 2 is the y-intercept
+
+## Point-Slope Form
+$$y-y_1 = m \times \left(x-x_1\right)$$
+$$\Rightarrow y=m(x-x_1)+y_1$$
+
+$$ = mx-mx_1+y_1$$
+$$\Rightarrow \text{y-intercept}=y_1-m\times x_1$$
+---
+# A very common problem...
+Two equations:
+$$y=a-bx$$
+$$y=c+dx$$
+where a,b,c,d are parameters (any constant number)
+```{r, echo=F, fig.height = 4, dev.args = list(bg = 'transparent')}
+g1<-textGrob("a",  gp=gpar( fontsize=13, fontface="italic"))
+g2<-textGrob("c",  gp=gpar( fontsize=13, fontface="italic"))
+g3<-textGrob("y*", gp=gpar( fontsize=13, fontface="italic"))
+g4<-textGrob("x*", gp=gpar( fontsize=13, fontface="italic"))
+g5<-textGrob("a/b", gp=gpar( fontsize=13, fontface="italic"))
+ggplot()+  geom_segment(aes(x = 0, y = 8, xend = 8, yend = 0))+
+  geom_segment(aes(x = 0, y = 2, xend = 8, yend = 6))+ coord_cartesian(clip = "off")+
+  labs(y ="y",  x = "x", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), 
+                                            axis.text.x = element_text(size = 18, colour="black"), 
+                                            axis.text.y = element_text(size = 18, colour="black"),  
+                                            panel.grid.major = element_blank(), legend.position = "none",
+                                            panel.grid.minor = element_blank(),
+                                            panel.background = element_rect(fill = "transparent"), # bg of the panel
+                                            plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+                                            legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+                                            legend.box.background = element_rect(fill = "transparent"),
+                                            axis.line = element_line(size = 1) )+ # get rid of legend panel bg 
+  expand_limits(x = 0, y = 0)+ 
+  scale_x_continuous(expand = c(0, 0), limits=c(0,10),breaks=NULL)+ 
+  scale_y_continuous(expand = c(0, 0),limits = c(0,10),breaks=NULL) + annotate("point",x=4,y=4,size=3,color="red")+
+  annotate("segment",x=c(4,0),xend=c(4,4),y=c(0,4),yend=c(4,4),linetype="dashed")+
+  annotation_custom(g1,x=-0.2,  ymax=8,xmax=-0.2,  y=8)+
+  annotation_custom(g2,x=-0.2,  ymax=2,xmax=-0.2,  y=2)+
+  annotation_custom(g3, x=-0.2,  ymax=4,xmax=-0.2,  y=4)+
+  annotation_custom(g4, x=4,  ymax=-.1, xmax=4,  y=-.2)+
+  annotation_custom(g5, x=8,  ymax=-.1, xmax=8,  y=-.2)+coord_cartesian(clip = "off")
+```
+
+---
+layout: false
+class: top,clear
+name: subs
+Two easy ways to solve for $\left(x^*,y^*\right)$
+ 1. Subtract equations 
+ $$ \quad y = a - bx $$
+ $$ -\quad y=c+dx$$
+ <hr>
+ $$\Rightarrow 0 = a-c-bx-dx$$
+ $$\Rightarrow a-bx = c+dx$$
+ $$\Rightarrow (b+x)x = a-c$$
+ $$x^*=\frac{a-c}{b+d}$$
+ If we plug back into one of the original equations to find $y^*$:
+ $$y* = a-b\left(\frac{a-c}{b+d}\right)$$
+---
+layout: false
+class: top,clear
+Two easy ways to solve for $\left(x^*,y^*\right)$
+ 2. Substitute one equation into the other
+ $$ y = y $$
+ $$ a-bx = c +dx$$
+ $$x^*=\frac{a-c}{b+d}$$
+ $$y* = a-b\left(\frac{a-c}{b+d}\right)$$
+---
+layout: false
+class: top,clear
+ Example problem:
+ $$ y = 27-3x$$
+ $$ y = 9x - 9$$
+ $$\Rightarrow 27-3x = 9x-9$$
+ $$\Rightarrow 36 = 12x$$
+ $$x^*=3$$
+ $$y^*=9x^*-9=9*3-9=27-9=18$$
+ 
+---
+
+layout: false
+class: top,clear
+
+$$ y = 27-3x$$
+$$ y = 9x - 9$$
+.hi[solution:] $\left(x^*,y^*\right)=\left(3,18\right)$
+ 
+```{r, echo=F, fig.height = 4, dev.args = list(bg = 'transparent')}
+g1<-textGrob("27",  gp=gpar( fontsize=13, fontface="italic"))
+g2<-textGrob("1",  gp=gpar( fontsize=13, fontface="italic"))
+g3<-textGrob("18", gp=gpar( fontsize=13, fontface="italic"))
+g4<-textGrob("3", gp=gpar( fontsize=13, fontface="italic"))
+g5<-textGrob("9", gp=gpar( fontsize=13, fontface="italic"))
+ggplot()+  geom_segment(aes(x = 0, y = 27, xend = 9, yend = 0))+
+  geom_segment(aes(x = 1, y = 0, xend = 4, yend = 27))+ coord_cartesian(clip = "off")+
+  labs(y ="y",  x = "x", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), 
+                                            axis.text.x = element_text(size = 18, colour="black"), 
+                                            axis.text.y = element_text(size = 18, colour="black"),  
+                                            panel.grid.major = element_blank(), legend.position = "none",
+                                            panel.grid.minor = element_blank(),
+                                            panel.background = element_rect(fill = "transparent"), # bg of the panel
+                                            plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+                                            legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+                                            legend.box.background = element_rect(fill = "transparent"),
+                                            axis.line = element_line(size = 1) )+ # get rid of legend panel bg 
+  expand_limits(x = 0, y = 0)+ 
+  scale_x_continuous(expand = c(0, 0), limits=c(0,10),breaks=NULL)+ 
+  scale_y_continuous(expand = c(0, 0),limits = c(0,30),breaks=NULL) + annotate("point",x=3,y=18,size=3,color="red")+
+  annotate("segment",x=c(3,0),xend=c(3,3),y=c(0,18),yend=c(18,18),linetype="dashed")+
+  annotation_custom(g1,x=-0.2,  ymax=27,xmax=-0.2,  y=27)+
+  annotation_custom(g2,x=1,  ymax=-1,xmax=1,  y=-1)+
+  annotation_custom(g3, x=-0.2,  ymax=18,xmax=-0.2,  y=18)+
+  annotation_custom(g4, x=3,  ymax=-1, xmax=3,  y=-1)+
+  annotation_custom(g5, x=9,  ymax=-1, xmax=9,  y=-1)+coord_cartesian(clip = "off")
+```
+---
+# Charts from Data
+Example: City of Buda - High School Exit Test Scores vs. Student to Teach ratio
+
+|Year  | Stu/Teach | Exit Test Score|
+|-----|----|---|
+|2000 | 20 | 80|
+|2002 | 26 | 65|
+|2004 | 28 | 60|
+|2006 | 32 | 50|
+|2008 | 30 | 55|
+|2010 | 22 | 75|
+|2012 | 24 | 79|
+---
+
+layout: false
+class: top,clear
+Sort it by independent variable: student-teacher ratio
+.pull-left[
+|Year  | Stu/Teach | Exit Test Score|
+|-----|----|---|
+|2000 | 20 | 80|
+|2002 | 26 | 65|
+|2004 | 28 | 60|
+|2006 | 32 | 50|
+|2008 | 30 | 55|
+|2010 | 22 | 75|
+|2012 | 24 | 79|
+]
+.pull-right[
+|Stu/Teach | Exit Test Score|
+|----------|-----------------|
+| 20 | 80 |
+| 22 | 75 |
+| 24 | 70 |
+| 26 | 65 |
+| 28 | 60 |
+| 30 | 55 |
+| 32 | 50 |
+]
+---
+
+layout: false
+class: top,clear
+
+.pull-left[
+|Stu/Teach | Exit Test Score|
+|----------|-----------------|
+| 20 | 80 |
+| 22 | 75 |
+| 24 | 70 |
+| 26 | 65 |
+| 28 | 60 |
+| 30 | 55 |
+| 32 | 50 |
+]
+.pull-right[
+ - What is slope?
+ - Note that for every increase of 2 students to 1 teacher, test scores go down by 5
+ - Slope = -5/2 = -2.5
+]
+```{r, echo=F, fig.height = 4, dev.args = list(bg = 'transparent')}
+df=data.frame(x=seq(from=20,to=32,by=2),y=c(80,75,70,65,60,55,50)
+  )
+ggplot()+  geom_point(data=df,aes(x=x,y=y))+geom_segment(aes(x = 20, y = 80, xend = 32, yend = 50))+
+  labs(y ="Avg. Test Scores",  x = "Student/Teacher", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), 
+                                            axis.text.x = element_text(size = 18, colour="black"), 
+                                            axis.text.y = element_text(size = 18, colour="black"),  
+                                            panel.grid.major = element_blank(), legend.position = "none",
+                                            panel.grid.minor = element_blank(),
+                                            panel.background = element_rect(fill = "transparent"), # bg of the panel
+                                            plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+                                            legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+                                            legend.box.background = element_rect(fill = "transparent"),
+                                            axis.line = element_line(size = 1) )+ # get rid of legend panel bg 
+  expand_limits(x = 0, y = 0)+ 
+  scale_x_continuous(expand = c(0, 0), limits=c(0,40),breaks=seq(from=0,to=40,by=5))+ 
+  scale_y_continuous(expand = c(0, 0),limits = c(45,135),breaks=seq(from=50,to=130,by=10)) 
+```
+---
+layout: false
+class: top,clear
+.pull-left[.smallest[
+|Stu/Teach | Exit Test Score|
+|----------|-----------------|
+| 20 | 80 |
+| 22 | 75 |
+| 24 | 70 |
+| 26 | 65 |
+| 28 | 60 |
+| 30 | 55 |
+| 32 | 50 |
+]
+]
+.pull-right[
+ - What is y-intercept?: each step in Stu/Teach ratio is 2: 10 steps -> scores increase by 5 for each step: -> 50 points
+  - 10*5 + 80 = 130
+- equation for line: TestScore = 130 - 2.5 * StudentTeacherRatio
+]
+```{r, echo=F, fig.height = 4, dev.args = list(bg = 'transparent')}
+df=data.frame(x=seq(from=20,to=32,by=2),y=c(80,75,70,65,60,55,50)
+  )
+ggplot()+  geom_point(data=df,aes(x=x,y=y))+geom_segment(aes(x = 0, y = 130, xend = 32, yend = 50))+
+  labs(y ="Avg. Test Scores",  x = "Student/Teacher", colour = "")+theme(text = element_text(size = 20),axis.title=element_text(size=18), 
+                                            axis.text.x = element_text(size = 18, colour="black"), 
+                                            axis.text.y = element_text(size = 18, colour="black"),  
+                                            panel.grid.major = element_blank(), legend.position = "none",
+                                            panel.grid.minor = element_blank(),
+                                            panel.background = element_rect(fill = "transparent"), # bg of the panel
+                                            plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+                                            legend.background = element_rect(fill = "transparent", color = NA), # get rid of legend bg
+                                            legend.box.background = element_rect(fill = "transparent"),
+                                            axis.line = element_line(size = 1) )+ # get rid of legend panel bg 
+  expand_limits(x = 0, y = 0)+ 
+  scale_x_continuous(expand = c(0, 0), limits=c(0,40),breaks=seq(from=0,to=40,by=5))+ 
+  scale_y_continuous(expand = c(0, 0),limits = c(45,135),breaks=seq(from=50,to=130,by=10)) 
+```
+---
+name: qs
+
+#Practice Problem
+Austin Integrated School District
+Enrollment in 2018: 82,520
+Enrollment in 2019: 80,495
+Expenditures in 2018: $1.6 billion
+Expenditures in 2019: $2.082 billion
+
+ 1. What is average spending per student over 2018-19?
+ 2. Calculate percentage change in expenditures 2018-9?
+ 3. What is the slope of the line that connects 2018-9, where enrollment is x and expenditures is y?
+
+---
+exclude: true
+
+```{R, generate pdfs, include = F, eval = F}
+pagedown::chrome_print("C:\\Users\\waxla\\Box\\LBJ_Micro\\2020\\Lectures\\00-lecture-mathreview-FA20.html", output = "C:\\Users\\waxla\\Box\\LBJ_Micro\\2020\\Lectures\\00-lecture-mathreview-FA20.pdf")
+```
